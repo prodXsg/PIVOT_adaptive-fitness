@@ -33,6 +33,15 @@ export type PriorPivot = {
   constraint: string;
 };
 
+type PivotHistoryEntry = {
+  exerciseId: string;
+  originalName: string;
+  newName: string;
+  constraint: string;
+  rationale: string;
+  timestamp: string;
+};
+
 type Replacement = {
   name: string;
   setsReps: string;
@@ -104,6 +113,7 @@ type AppState = {
   finalizeSessionQuality: () => void;
   totalPivotCount: number;
   lastCheckIn: CheckIn | null;
+  pivotHistory: PivotHistoryEntry[];
 };
 
 function readLS<T>(key: string, fallback: T): T {
@@ -265,6 +275,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     readLS<number>("pivot_total_pivots", 0));
   const [lastCheckIn, setLastCheckInInternal] = useState<CheckIn | null>(() =>
     readLS<CheckIn | null>("pivot_last_checkin_data", null));
+  const [pivotHistory, setPivotHistoryInternal] = useState<PivotHistoryEntry[]>(() =>
+    readLS<PivotHistoryEntry[]>("pivot_history_v1", []));
   const [recentExercises, setRecentExercises] = useState<string[]>(() =>
     readLS<string[]>("pivot_recent_exercises_v1", []));
   const [recentPivotReplacements, setRecentPivotReplacements] = useState<string[]>(() =>
@@ -298,9 +310,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const setTodayWorkout = (w: Workout | null) => {
     // Preserve originalExerciseCount when setting for the first time
-    const enhanced = w && !w.originalExerciseCount
+    let enhanced = w && !w.originalExerciseCount
       ? { ...w, originalExerciseCount: w.exercises.length }
       : w;
+
+    // Restore pivot metadata from history
+    if (enhanced && pivotHistory.length > 0) {
+      enhanced = {
+        ...enhanced,
+        exercises: enhanced.exercises.map((ex) => {
+          const pivotEntry = pivotHistory.find((p) => p.exerciseId === ex.id);
+          if (pivotEntry) {
+            return {
+              ...ex,
+              pivoted: true,
+              pivotRationale: pivotEntry.rationale,
+              pivotConstraint: pivotEntry.constraint,
+            };
+          }
+          return ex;
+        }),
+      };
+    }
+
     setTodayWorkoutInternal(enhanced);
     writeLS("pivot_today_workout", enhanced);
   };
@@ -452,6 +484,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const pivotExercise: AppState["pivotExercise"] = (exerciseId, replacement) => {
+    const originalExercise = todayWorkout?.exercises.find((e) => e.id === exerciseId);
+    const originalName = originalExercise?.name ?? "Unknown";
+
     setTodayWorkoutInternal((w) => {
       if (!w) return w;
       const updated = w.exercises.map((e) =>
@@ -472,6 +507,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       writeLS("pivot_today_workout", next);
       return next;
     });
+
+    setPivotHistoryInternal((prev) => {
+      const entry: PivotHistoryEntry = {
+        exerciseId,
+        originalName,
+        newName: replacement.name,
+        constraint: replacement.constraint ?? "",
+        rationale: replacement.rationale ?? "",
+        timestamp: new Date().toISOString(),
+      };
+      const next = [entry, ...prev];
+      writeLS("pivot_history_v1", next);
+      return next;
+    });
+
     setTotalPivotCount((n) => {
       const next = n + 1;
       writeLS("pivot_total_pivots", next);
@@ -563,12 +613,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       sessionQualityHistory, adaptiveMemory, finalizeSessionQuality,
       totalPivotCount,
       lastCheckIn,
+      pivotHistory,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tab, theme, isReturning, todayWorkout, workoutState, userProfile, hasGeneratedWorkout,
      checkInCount, completedWorkoutsCount, totalTrainingTime, lastWorkoutDate, lastWorkoutFocus,
      weeklyCompletedWorkouts, exerciseStatusById,
-     sessionQualityHistory, adaptiveMemory, totalPivotCount, lastCheckIn]
+     sessionQualityHistory, adaptiveMemory, totalPivotCount, lastCheckIn, pivotHistory]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

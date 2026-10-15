@@ -107,6 +107,7 @@ function PivotApp() {
           "pivot_skipped_exercises",
           "pivot_partial_exercises",
           "pivot_last_checkin_data",
+          "pivot_history_v1",
         ].forEach((k) => localStorage.removeItem(k));
       } catch {}
 
