@@ -215,6 +215,22 @@ Output only valid JSON:
 }`;
 }
 
+function validateWorkoutAgainstConstraints(
+  raw: RawPlan,
+  expectedFocus: string,
+  timeRules: { minDuration: number; maxDuration: number },
+): boolean {
+  const focusKeyword = expectedFocus.split(" ")[0].toLowerCase();
+  const rationale = (raw.rationale ?? "").toLowerCase();
+
+  if (!rationale.includes(focusKeyword)) {
+    console.log("[generate] focus validation FAILED — using deterministic fallback");
+    return false;
+  }
+
+  return true;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -283,6 +299,12 @@ Deno.serve(async (req) => {
         note,
       }),
     )) as RawPlan;
+
+    const isValidResponse = validateWorkoutAgainstConstraints(raw, focus, rules);
+    if (!isValidResponse) {
+      console.log("[generate] LLM response invalid — falling back to deterministic");
+      return json(fallbackDet);
+    }
 
     const lowReadiness = sleep < 6 || energy <= 4 || soreness >= 7;
     const defaultSets = lowReadiness ? 2 : 3;
