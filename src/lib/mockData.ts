@@ -28,11 +28,13 @@ export type ProgressionSnapshot = {
 export type Workout = {
   focus: string;
   duration: number; // minutes
+  durationReasoning?: string;
   rationale: string;
   exercises: Exercise[];
   originalExerciseCount?: number;
   reasoning?: AdaptiveReasoning;
   progression?: ProgressionSnapshot;
+  adaptiveNote?: string;
   debug?: Record<string, unknown>;
 };
 
