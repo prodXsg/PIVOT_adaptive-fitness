@@ -237,7 +237,7 @@ export function CheckInScreen({
                   e.stopPropagation();
                   setCustomTimeOpen(true);
                 }}
-                style={chipStyle(customTime.isCustom, !!chipAnim["time-custom"])}
+                style={{ ...chipStyle(customTime.isCustom, !!chipAnim["time-custom"]), marginTop: 12 }}
               >
                 Custom ({customTime.isCustom ? `${customTime.duration} min` : "Set"})
               </button>
@@ -335,17 +335,17 @@ function CustomTimeModal({
               id="time-input"
               type="range"
               min="10"
-              max="90"
+              max="120"
               value={inputValue}
               onChange={(e) => setInputValue(Number(e.target.value))}
               className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
               style={{
-                background: `linear-gradient(to right, #C7F73D 0%, #C7F73D ${((inputValue - 10) / 80) * 100}%, rgba(255,255,255,0.08) ${((inputValue - 10) / 80) * 100}%, rgba(255,255,255,0.08) 100%)`,
+                background: `linear-gradient(to right, #C7F73D 0%, #C7F73D ${((inputValue - 10) / 110) * 100}%, rgba(255,255,255,0.08) ${((inputValue - 10) / 110) * 100}%, rgba(255,255,255,0.08) 100%)`,
               }}
             />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
               <span>10 min</span>
-              <span>90 min</span>
+              <span>120 min</span>
             </div>
           </div>
 
@@ -354,15 +354,21 @@ function CustomTimeModal({
               type="number"
               value={inputValue}
               onChange={(e) => {
-                const val = Math.min(90, Math.max(10, Number(e.target.value) || 0));
+                const val = Math.min(120, Math.max(10, Number(e.target.value) || 0));
                 setInputValue(val);
               }}
               min="10"
-              max="90"
+              max="120"
               className="w-full bg-elevated border border-border rounded-lg px-4 py-3 text-sm text-center font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40"
               placeholder="Enter duration"
             />
           </div>
+
+          {inputValue > 90 && (
+            <p className="text-xs text-muted-foreground text-center">
+              Long session — consider splitting if possible
+            </p>
+          )}
 
           <button
             onClick={() => onSubmit(inputValue)}
