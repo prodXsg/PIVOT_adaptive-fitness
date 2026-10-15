@@ -4,7 +4,6 @@ import { useApp, PriorPivot } from "@/context/AppContext";
 import { Exercise } from "@/lib/mockData";
 import { PivotModal } from "./PivotModal";
 import { ExerciseImage } from "./ExerciseImage";
-import { getIconForMovement } from "@/lib/iconMapping";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
@@ -239,23 +238,18 @@ export function WorkoutScreen({
 
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <div style={{ color: "rgba(199,247,61,0.60)", display: "flex", alignItems: "center" }}>
-                          {getIconForMovement(ex.movementPattern)}
-                        </div>
-                        <h3
-                          style={{
-                            fontSize: 15,
-                            fontWeight: 600,
-                            lineHeight: 1.2,
-                            color: "hsl(var(--foreground))",
-                            textDecoration: isInactive ? "line-through" : "none",
-                            textDecorationColor: "rgba(255,255,255,0.30)",
-                          }}
-                        >
-                          {ex.name}
-                        </h3>
-                      </div>
+                      <h3
+                        style={{
+                          fontSize: 15,
+                          fontWeight: 600,
+                          lineHeight: 1.2,
+                          color: "hsl(var(--foreground))",
+                          textDecoration: isInactive ? "line-through" : "none",
+                          textDecorationColor: "rgba(255,255,255,0.30)",
+                        }}
+                      >
+                        {ex.name}
+                      </h3>
                       {ex.pivoted && !isInactive && (
                         <span
                           style={{
