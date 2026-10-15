@@ -237,7 +237,7 @@ export function CheckInScreen({
                   e.stopPropagation();
                   setCustomTimeOpen(true);
                 }}
-                style={chipStyle(customTime.isCustom, !!chipAnim["time-custom"])}
+                style={{ ...chipStyle(customTime.isCustom, !!chipAnim["time-custom"]), marginTop: 12 }}
               >
                 Custom ({customTime.isCustom ? `${customTime.duration} min` : "Set"})
               </button>
