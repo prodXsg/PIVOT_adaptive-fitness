@@ -255,6 +255,7 @@ function PivotApp() {
           mode="preview"
           onBack={() => setHomeFlow("home")}
           onComplete={() => {
+            clearExerciseStatuses();
             setWorkoutState("WORKOUT_STARTED");
             setHomeFlow("workout");
           }}
