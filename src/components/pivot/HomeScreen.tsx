@@ -163,6 +163,7 @@ export function HomeScreen({
 
   const adaptiveSummary = isGenerated ? todayWorkout?.reasoning?.summary ?? "" : "";
   const adaptiveReasons = isGenerated ? (todayWorkout?.reasoning?.adaptations ?? []).slice(0, 2) : [];
+  const durationReasoning = isGenerated ? todayWorkout?.durationReasoning : "";
   const lastQuality = sessionQualityHistory[0];
 
   // Post-workout stats
@@ -290,6 +291,20 @@ export function HomeScreen({
                 color="#000"
               />
             </button>
+          )}
+
+          {isGenerated && durationReasoning && (
+            <p
+              style={{
+                marginTop: 10,
+                fontSize: 11,
+                color: "rgba(255,255,255,0.45)",
+                lineHeight: 1.4,
+                animation: "home-rise 300ms 550ms ease-out both",
+              }}
+            >
+              {durationReasoning}
+            </p>
           )}
 
           {isGenerated && adaptiveReasons.length > 0 && (

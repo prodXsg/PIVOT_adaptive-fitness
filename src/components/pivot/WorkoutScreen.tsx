@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { ArrowLeft, Check, Clock, MoreHorizontal, RefreshCw } from "lucide-react";
+import { ArrowLeft, Check, Clock, MoreHorizontal, RefreshCw, Loader } from "lucide-react";
 import { useApp, PriorPivot } from "@/context/AppContext";
 import { Exercise } from "@/lib/mockData";
 import { PivotModal } from "./PivotModal";
 import { ExerciseImage } from "./ExerciseImage";
+import { getIconForMovement } from "@/lib/iconMapping";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
@@ -27,11 +28,13 @@ export function WorkoutScreen({
     swapExercise,
     exerciseStatusById,
     setExerciseStatus,
+    lastCheckIn,
   } = useApp();
 
   const [pivotTarget, setPivotTarget] = useState<Exercise | null>(null);
   const [priorPivots, setPriorPivots] = useState<PriorPivot[]>([]);
   const [finishing, setFinishing] = useState(false);
+  const [pivotLoading, setPivotLoading] = useState(false);
   const [optionsOpenId, setOptionsOpenId] = useState<string | null>(null);
   const [undoPromptId, setUndoPromptId] = useState<string | null>(null);
 
@@ -81,8 +84,7 @@ export function WorkoutScreen({
   const handlePivot = async (constraint: string) => {
     if (!pivotTarget) return;
     const target = pivotTarget;
-    setPivotTarget(null);
-    setOptionsOpenId(null);
+    setPivotLoading(true);
     try {
       const alt = await swapExercise(target.id, constraint, priorPivots);
       pivotExercise(target.id, alt);
@@ -91,10 +93,16 @@ export function WorkoutScreen({
         { original: target.name, replacement: alt.name, constraint },
       ]);
       setTimeout(() => {
+        setPivotTarget(null);
+        setOptionsOpenId(null);
         toast(`Swapped to ${alt.name}`, { description: alt.rationale });
-      }, 200);
+      }, 300);
     } catch {
+      setPivotTarget(null);
+      setOptionsOpenId(null);
       toast.error("Couldn't swap that exercise. Try again.");
+    } finally {
+      setPivotLoading(false);
     }
   };
 
@@ -231,18 +239,23 @@ export function WorkoutScreen({
 
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                      <h3
-                        style={{
-                          fontSize: 15,
-                          fontWeight: 600,
-                          lineHeight: 1.2,
-                          color: "hsl(var(--foreground))",
-                          textDecoration: isInactive ? "line-through" : "none",
-                          textDecorationColor: "rgba(255,255,255,0.30)",
-                        }}
-                      >
-                        {ex.name}
-                      </h3>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <div style={{ color: "rgba(199,247,61,0.60)", display: "flex", alignItems: "center" }}>
+                          {getIconForMovement(ex.movementPattern)}
+                        </div>
+                        <h3
+                          style={{
+                            fontSize: 15,
+                            fontWeight: 600,
+                            lineHeight: 1.2,
+                            color: "hsl(var(--foreground))",
+                            textDecoration: isInactive ? "line-through" : "none",
+                            textDecorationColor: "rgba(255,255,255,0.30)",
+                          }}
+                        >
+                          {ex.name}
+                        </h3>
+                      </div>
                       {ex.pivoted && !isInactive && (
                         <span
                           style={{
@@ -268,14 +281,14 @@ export function WorkoutScreen({
                         </span>
                       )}
                       {isPartial && !isDone && (
-                        <span style={{ fontSize: 9, color: "rgba(199,247,61,0.50)", fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase" }}>
+                        <span style={{ fontSize: 9, color: "rgba(251,146,60,0.85)", fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase" }}>
                           Partial
                         </span>
                       )}
                     </div>
                     {ex.pivoted && ex.pivotRationale && (
-                      <p style={{ marginTop: 2, fontSize: 12, color: "rgba(255,255,255,0.55)", lineHeight: 1.4 }}>
-                        Pivoted: {ex.pivotRationale}
+                      <p style={{ marginTop: 3, marginBottom: 1, fontSize: 11, color: "rgba(255,255,255,0.50)", lineHeight: 1.5, fontStyle: "italic" }}>
+                        ↩ {ex.pivotRationale}
                       </p>
                     )}
                     <p style={{ marginTop: 2, fontSize: 13, color: "hsl(var(--muted-foreground))" }}>
@@ -298,6 +311,7 @@ export function WorkoutScreen({
                             setOptionsOpenId(null);
                             setPivotTarget(ex);
                           }}
+                          disabled={pivotLoading}
                           style={{
                             display: "inline-flex",
                             alignItems: "center",
@@ -305,16 +319,27 @@ export function WorkoutScreen({
                             padding: "8px 12px",
                             borderRadius: 999,
                             border: "1px solid rgba(199,247,61,0.25)",
-                            background: "rgba(199,247,61,0.08)",
-                            color: "#C7F73D",
+                            background: pivotLoading ? "rgba(199,247,61,0.12)" : "rgba(199,247,61,0.08)",
+                            color: pivotLoading ? "rgba(199,247,61,0.50)" : "#C7F73D",
                             fontSize: 12,
                             fontWeight: 700,
                             textTransform: "uppercase",
-                            cursor: "pointer",
+                            cursor: pivotLoading ? "not-allowed" : "pointer",
+                            opacity: pivotLoading ? 0.6 : 1,
+                            transition: "all 200ms ease-out",
                           }}
                         >
-                          <RefreshCw size={14} strokeWidth={2.2} />
-                          Pivot
+                          {pivotLoading ? (
+                            <>
+                              <Loader size={14} strokeWidth={2.2} className="animate-spin" />
+                              Pivoting...
+                            </>
+                          ) : (
+                            <>
+                              <RefreshCw size={14} strokeWidth={2.2} />
+                              Pivot
+                            </>
+                          )}
                         </button>
                       )}
 
@@ -512,6 +537,9 @@ export function WorkoutScreen({
         exerciseName={pivotTarget?.name ?? ""}
         onClose={() => setPivotTarget(null)}
         onSubmit={handlePivot}
+        lastCheckIn={lastCheckIn}
+        workoutDuration={Math.round(progress * (todayWorkout?.duration ?? 45))}
+        totalDuration={todayWorkout?.duration ?? 45}
       />
     </div>
   );

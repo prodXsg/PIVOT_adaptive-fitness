@@ -351,6 +351,11 @@ Deno.serve(async (req) => {
       exercises.map((e) => clamp(Number(e.setsReps.split(" ")[0]), 2, 4, defaultSets)),
     );
     const duration = clamp(est, rules.minDuration, rules.maxDuration, rules.maxDuration);
+
+    const durationReasoning = duration < rules.maxDuration && est > rules.minDuration
+      ? `Generated ${duration} min within your ${rules.minDuration}-${rules.maxDuration} min preference to leave buffer for warmup/cooldown.`
+      : `Constrained to ${rules.minDuration}-${rules.maxDuration} min range. This session uses ${duration} min of your available time.`;
+
     const representedEmphasis = collectRepresentedEmphasisLabels(emphasisForScoring, picked);
     const adaptiveEmphasisNote = composeAdaptiveEmphasisNote(focus, representedEmphasis);
 
@@ -388,6 +393,7 @@ Deno.serve(async (req) => {
     return json({
       focus: composeFocusTitle(focus, representedEmphasis),
       duration,
+      durationReasoning,
       rationale: sanitizeInput(
         raw.rationale ??
           (lowReadiness
