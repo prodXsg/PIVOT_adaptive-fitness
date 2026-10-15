@@ -274,7 +274,7 @@ export function WorkoutScreen({
                         </span>
                       )}
                       {isPartial && !isDone && (
-                        <span style={{ fontSize: 9, color: "rgba(199,247,61,0.50)", fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase" }}>
+                        <span style={{ fontSize: 9, color: "rgba(251,146,60,0.85)", fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase" }}>
                           Partial
                         </span>
                       )}
