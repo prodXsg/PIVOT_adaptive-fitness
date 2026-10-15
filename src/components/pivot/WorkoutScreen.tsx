@@ -281,9 +281,24 @@ export function WorkoutScreen({
                       )}
                     </div>
                     {ex.pivoted && ex.pivotRationale && (
-                      <p style={{ marginTop: 3, marginBottom: 1, fontSize: 11, color: "rgba(255,255,255,0.50)", lineHeight: 1.5, fontStyle: "italic" }}>
-                        ↩ {ex.pivotRationale}
-                      </p>
+                      <div style={{ marginTop: 3, marginBottom: 1 }}>
+                        {ex.pivotRationale.split(/(?<=[.!?])\s+/).map((sentence: string, idx: number) => (
+                          <p
+                            key={idx}
+                            style={{
+                              fontSize: 11,
+                              color: "rgba(255,255,255,0.50)",
+                              lineHeight: 1.5,
+                              fontStyle: "italic",
+                              marginBottom: 2,
+                              wordWrap: "break-word",
+                              whiteSpace: "normal",
+                            }}
+                          >
+                            • {sentence.trim()}
+                          </p>
+                        ))}
+                      </div>
                     )}
                     <p style={{ marginTop: 2, fontSize: 13, color: "hsl(var(--muted-foreground))" }}>
                       {ex.setsReps}
