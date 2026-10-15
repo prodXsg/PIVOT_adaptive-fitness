@@ -1,18 +1,71 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import type { CheckIn } from "@/context/AppContext";
 
-const CHIPS = ["No bench available", "Only 20 min left", "Shoulder hurts", "Equipment busy"];
-
-export function PivotModal({
-  open, exerciseName, onClose, onSubmit,
-}: {
+type PivotModalProps = {
   open: boolean;
   exerciseName: string;
   onClose: () => void;
   onSubmit: (constraint: string) => void | Promise<void>;
-}) {
+  lastCheckIn?: CheckIn | null;
+  workoutDuration?: number;
+  totalDuration?: number;
+};
+
+function buildApplicableConstraints(
+  lastCheckIn: CheckIn | null | undefined,
+  workoutDuration: number | undefined,
+  totalDuration: number | undefined,
+): string[] {
+  const constraints: string[] = [];
+
+  // Pain constraint: Show if user reported soreness or low energy suggests joint stress risk
+  if (lastCheckIn) {
+    if (lastCheckIn.soreness && lastCheckIn.soreness > 4) {
+      constraints.push("Sore area — modify exercise");
+    } else if (lastCheckIn.soreness > 0 && lastCheckIn.energy <= 4) {
+      constraints.push("Joint feels stressed");
+    }
+  }
+
+  // Fatigue constraint: Show if low sleep or low energy
+  if (lastCheckIn && (lastCheckIn.sleep < 6 || lastCheckIn.energy <= 3)) {
+    constraints.push("Too fatigued for this exercise");
+  }
+
+  // Time constraint: Show if limited time remaining
+  if (workoutDuration !== undefined && totalDuration !== undefined) {
+    const remaining = totalDuration - workoutDuration;
+    if (remaining > 0 && remaining < 10) {
+      constraints.push(`Only ${remaining} min left`);
+    }
+  }
+
+  // Equipment constraint: Always show (user can report equipment issues anytime)
+  constraints.push("Equipment not available");
+
+  // If no specific constraints, provide a fallback
+  if (constraints.length === 0) {
+    constraints.push("Other reason");
+  }
+
+  return constraints;
+}
+
+export function PivotModal({
+  open,
+  exerciseName,
+  onClose,
+  onSubmit,
+  lastCheckIn,
+  workoutDuration = 0,
+  totalDuration = 45,
+}: PivotModalProps) {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [applicableConstraints] = useState(() =>
+    buildApplicableConstraints(lastCheckIn, workoutDuration, totalDuration)
+  );
 
   useEffect(() => {
     if (open) { setText(""); setLoading(false); }
@@ -60,7 +113,7 @@ export function PivotModal({
               className="mt-4 w-full bg-elevated border border-border rounded-2xl p-4 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/40 placeholder:text-tertiary"
             />
             <div className="mt-3 flex flex-wrap gap-2">
-              {CHIPS.map((c) => (
+              {applicableConstraints.map((c) => (
                 <button
                   key={c}
                   onClick={() => setText(c)}
@@ -70,6 +123,11 @@ export function PivotModal({
                 </button>
               ))}
             </div>
+            {applicableConstraints.length === 1 && applicableConstraints[0] === "Other reason" && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                No typical constraints detected. Describe any issues above.
+              </p>
+            )}
             <button
               onClick={submit}
               disabled={!text.trim()}

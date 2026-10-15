@@ -28,6 +28,7 @@ export function WorkoutScreen({
     swapExercise,
     exerciseStatusById,
     setExerciseStatus,
+    lastCheckIn,
   } = useApp();
 
   const [pivotTarget, setPivotTarget] = useState<Exercise | null>(null);
@@ -536,6 +537,9 @@ export function WorkoutScreen({
         exerciseName={pivotTarget?.name ?? ""}
         onClose={() => setPivotTarget(null)}
         onSubmit={handlePivot}
+        lastCheckIn={lastCheckIn}
+        workoutDuration={Math.round(progress * (todayWorkout?.duration ?? 45))}
+        totalDuration={todayWorkout?.duration ?? 45}
       />
     </div>
   );
