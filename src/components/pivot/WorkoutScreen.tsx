@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Check, Clock, MoreHorizontal, RefreshCw } from "lucide-react";
+import { ArrowLeft, Check, Clock, MoreHorizontal, RefreshCw, Loader } from "lucide-react";
 import { useApp, PriorPivot } from "@/context/AppContext";
 import { Exercise } from "@/lib/mockData";
 import { PivotModal } from "./PivotModal";
@@ -33,6 +33,7 @@ export function WorkoutScreen({
   const [pivotTarget, setPivotTarget] = useState<Exercise | null>(null);
   const [priorPivots, setPriorPivots] = useState<PriorPivot[]>([]);
   const [finishing, setFinishing] = useState(false);
+  const [pivotLoading, setPivotLoading] = useState(false);
   const [optionsOpenId, setOptionsOpenId] = useState<string | null>(null);
   const [undoPromptId, setUndoPromptId] = useState<string | null>(null);
 
@@ -82,8 +83,7 @@ export function WorkoutScreen({
   const handlePivot = async (constraint: string) => {
     if (!pivotTarget) return;
     const target = pivotTarget;
-    setPivotTarget(null);
-    setOptionsOpenId(null);
+    setPivotLoading(true);
     try {
       const alt = await swapExercise(target.id, constraint, priorPivots);
       pivotExercise(target.id, alt);
@@ -92,10 +92,16 @@ export function WorkoutScreen({
         { original: target.name, replacement: alt.name, constraint },
       ]);
       setTimeout(() => {
+        setPivotTarget(null);
+        setOptionsOpenId(null);
         toast(`Swapped to ${alt.name}`, { description: alt.rationale });
-      }, 200);
+      }, 300);
     } catch {
+      setPivotTarget(null);
+      setOptionsOpenId(null);
       toast.error("Couldn't swap that exercise. Try again.");
+    } finally {
+      setPivotLoading(false);
     }
   };
 
@@ -304,6 +310,7 @@ export function WorkoutScreen({
                             setOptionsOpenId(null);
                             setPivotTarget(ex);
                           }}
+                          disabled={pivotLoading}
                           style={{
                             display: "inline-flex",
                             alignItems: "center",
@@ -311,16 +318,27 @@ export function WorkoutScreen({
                             padding: "8px 12px",
                             borderRadius: 999,
                             border: "1px solid rgba(199,247,61,0.25)",
-                            background: "rgba(199,247,61,0.08)",
-                            color: "#C7F73D",
+                            background: pivotLoading ? "rgba(199,247,61,0.12)" : "rgba(199,247,61,0.08)",
+                            color: pivotLoading ? "rgba(199,247,61,0.50)" : "#C7F73D",
                             fontSize: 12,
                             fontWeight: 700,
                             textTransform: "uppercase",
-                            cursor: "pointer",
+                            cursor: pivotLoading ? "not-allowed" : "pointer",
+                            opacity: pivotLoading ? 0.6 : 1,
+                            transition: "all 200ms ease-out",
                           }}
                         >
-                          <RefreshCw size={14} strokeWidth={2.2} />
-                          Pivot
+                          {pivotLoading ? (
+                            <>
+                              <Loader size={14} strokeWidth={2.2} className="animate-spin" />
+                              Pivoting...
+                            </>
+                          ) : (
+                            <>
+                              <RefreshCw size={14} strokeWidth={2.2} />
+                              Pivot
+                            </>
+                          )}
                         </button>
                       )}
 
