@@ -228,6 +228,13 @@ function validateWorkoutAgainstConstraints(
     return false;
   }
 
+  const exerciseCount = raw.exercises?.length ?? 0;
+  const estimatedDuration = exerciseCount * 5;
+  if (estimatedDuration < timeRules.minDuration || estimatedDuration > timeRules.maxDuration) {
+    console.log("[generate] duration validation FAILED — using deterministic fallback");
+    return false;
+  }
+
   return true;
 }
 
