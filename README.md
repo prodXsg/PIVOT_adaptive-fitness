@@ -1,271 +1,128 @@
+<div align="center">
+
 # Pivot
 
-**Adaptive workouts that adjust to your actual day, not a fixed template.**
+**Workouts that adapt to your actual day.**
 
-Pivot is a mobile-first AI fitness app that dynamically composes workouts based on readiness, recovery, soreness, available time, and real-world constraints.
+Most fitness apps optimize for plan consistency. Pivot optimizes for training consistency.
 
-Instead of following a rigid training plan, users complete a lightweight daily check-in and Pivot generates a personalized workout that adapts to:
+</div>
 
-* energy levels
-* sleep quality
-* soreness
-* available workout time
-* equipment limitations
-* pain or movement constraints
-
-The system combines deterministic adaptive logic with AI-assisted workout generation to create sessions that feel intentional, personalized, and context-aware.
+Recovery fluctuates. Equipment is unpredictable. Energy changes. Time runs short. Pivot adapts workouts to real-world constraints so users can keep training when their original plan no longer fits.
 
 ---
 
-# Why Pivot Exists
+## The Problem
 
-Most fitness apps optimize for consistency of plans.
+Traditional workout plans assume predictable schedules, recovery, and equipment availability.
 
-Pivot optimizes for consistency of training.
+But real life gets in the way. You slept five hours instead of eight, the gym is crowded, your available time drops to 20 minutes, or an exercise becomes uncomfortable.
 
-The system assumes:
+A rigid plan leaves users to figure out what to change and how to preserve the intent of their session.
 
-* recovery fluctuates daily
-* gym environments are unpredictable
-* users miss sessions
-* energy levels change
-* adherence matters more than rigid perfection
-
-Instead of forcing users to follow static programming, Pivot continuously adapts around the user’s real-world condition.
+**Pivot treats changing conditions as inputs to the workout, not reasons to abandon it.**
 
 ---
 
-# Core Features
+## How It Works
 
-## Adaptive Daily Check-In
+### 1. Daily Check-In
 
-Users complete a lightweight readiness check-in including:
+Users provide a quick snapshot of their current condition:
 
-* sleep quality
-* energy level
-* soreness
-* available workout time
-* optional contextual notes
+- Sleep and energy
+- Soreness or pain
+- Available training time, from 10 to 120 minutes
+- Additional constraints, when needed
 
-Example:
+### 2. Adaptive Workout Generation
 
-> “Left shoulder feels tweaky today.”
+Pivot generates a workout based on readiness, training focus, available time, and constraints. The system validates key requirements server-side and provides reasoning for the generated workout.
 
-The system dynamically adjusts:
+### 3. Live Pivoting
 
-* workout focus
-* exercise selection
-* intensity
-* volume
-* session duration
+When equipment is unavailable or a constraint changes mid-session, users can request a replacement exercise.
+
+Pivot aims to preserve the intended training stimulus while respecting the new constraint. Each pivot records the replacement and its rationale, creating a persistent history of how the workout evolved.
 
 ---
 
-## Constraint-Aware Workout Generation
+## What Makes Pivot Different
 
-Pivot uses a hybrid adaptive engine combining:
-
-* deterministic scoring
-* movement-pattern balancing
-* recovery-aware logic
-* AI-assisted composition
-
-to generate workouts that:
-
-* preserve workout identity
-* respect recovery constraints
-* adapt around user intent
-* maintain session quality
-
-Examples:
-
-* Pull + abs/core emphasis
-* Full Body + hamstrings + calves
-* Legs + glute emphasis
+- **Constraint-aware generation:** Composes workouts around current conditions rather than relying solely on fixed templates.
+- **Explainable adaptations:** Shows users why an exercise or workout was selected.
+- **Persistent pivot history:** Preserves actual substitutions and their reasoning.
+- **Recovery-aware re-entry:** Supports adapted workouts after four or more missed days.
+- **Graceful degradation:** Uses deterministic fallback logic when AI output cannot be used.
 
 ---
 
-## Layered Workout Intent System
+## Architecture
 
-The workout engine separates:
+**Design principle: AI composes. Deterministic logic enforces constraints.**
 
-* workout identity
-  from:
-* emphasis modifiers
+### AI Composition
 
-Layer 1:
+**Google Gemini 2.5 Flash**
 
-* Push
-* Pull
-* Legs
-* Full Body
+Generates exercise selections and contextual reasoning based on the user's current circumstances.
 
-Layer 2:
+### Backend and Validation
 
-* shoulders
-* calves
-* hamstrings
-* abs/core
-* rear delts
-* forearms
-* and other emphasis areas
+**Supabase Edge Functions (Deno)**
 
-The adaptive engine uses constraint-aware composition logic so workouts remain structurally coherent while still reflecting explicit user priorities.
+Validate workout requirements, handle invalid AI output, and record pivot events.
 
----
+Key responsibilities include:
 
-## In-Workout Pivoting
+- **Focus validation:** Checks alignment with the requested training focus.
+- **Duration validation:** Checks the workout against the available time budget.
+- **Fallback handling:** Routes invalid output through deterministic workout logic.
+- **Pivot logging:** Records substitutions and their reasoning.
 
-Every exercise supports live replacement.
+### Example: Constraint Validation
 
-If:
+A user requests a 20-minute leg workout, but the model returns a 45-minute upper-body workout.
 
-* equipment is unavailable
-* pain appears mid-session
-* movement feels uncomfortable
-* the gym is crowded
+The system should reject the invalid result and route it through the appropriate fallback or regeneration path rather than presenting it as a valid workout.
 
-users can tap:
-
-> Pivot
-
-and describe the issue.
-
-The adaptive engine generates a replacement while preserving:
-
-* workout structure
-* muscle intent
-* movement quality
-* duration balance
+This illustrates the intended architecture. Actual behavior depends on the implemented validation and fallback logic.
 
 ---
 
-## Recovery-Aware Re-Entry
+## Current Status
 
-If users miss multiple training days, Pivot automatically detects inactivity and generates:
+Pivot is a working prototype deployed in production.
 
-* reduced intensity
-* lower fatigue
-* recovery-aware re-entry workouts
+The project includes adaptive workout generation, focus and duration validation, exercise substitutions, pivot history persistence, and recovery-aware re-entry.
 
-This helps reduce:
-
-* injury risk
-* excessive soreness
-* unsustainable training spikes
+Current development focuses on generation reliability and constraint handling. Implemented functionality is not the same as proven reliability or demonstrated improvements in training consistency.
 
 ---
 
-## Weekly Insights
+## Roadmap
 
-Pivot generates adaptive weekly summaries including:
-
-* training consistency
-* recovery patterns
-* skipped movements
-* recurring soreness
-* workout emphasis trends
-* adaptation behaviors
-
-Summaries are stored locally and remain browsable in-app.
+- **Progression tracking:** Remember movement-level performance across sessions.
+- **Fatigue modeling:** Account for longer-term training load.
+- **Adaptive microcycles:** Use weekly training patterns to inform individual sessions.
+- **Richer personalization:** Combine readiness, performance history, equipment, and training goals.
 
 ---
 
-# Adaptive Engine Architecture
+## Tech Stack
 
-Pivot uses a hybrid architecture combining:
-
-* deterministic constraint systems
-* adaptive scoring
-* AI-assisted workout composition
-
-The system evolved from:
-
-* weighted template selection
-
-toward:
-
-* constraint-aware adaptive workout composition
-
-Core adaptive behaviors include:
-
-* workout identity preservation
-* emphasis slot reservation
-* readiness-aware scaling
-* movement-pattern balancing
-* adaptive fallback handling
-* deterministic safety constraints
-* recovery-aware prioritization
-* live exercise replacement
-* graceful degradation under conflicting constraints
-
-The engine prioritizes:
-
-1. safety and recovery constraints
-2. explicit user-selected emphasis areas
-3. workout identity preservation
-4. optimization and balancing heuristics
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui
+- React Context
+- localStorage
+- Supabase Edge Functions (Deno)
+- Google Gemini 2.5 Flash
 
 ---
 
-# Tech Stack
-
-| Layer            | Technology                     |
-| ---------------- | ------------------------------ |
-| Frontend         | React 18 + TypeScript + Vite   |
-| Styling          | Tailwind CSS v3 + shadcn/ui    |
-| State Management | React Context + localStorage   |
-| Backend          | Supabase Edge Functions (Deno) |
-| AI               | Google Gemini 2.5 Flash        |
-| Routing          | React Router v6                |
-
----
-
-# Failure Handling & Edge Cases
-
-| Scenario                  | Behavior                                         |
-| ------------------------- | ------------------------------------------------ |
-| Gemini unavailable        | Falls back to deterministic default workouts     |
-| Network offline           | Non-AI features continue working                 |
-| 4+ missed training days   | Generates adaptive deload/re-entry sessions      |
-| Extreme readiness values  | Inputs clamped server-side                       |
-| Long user notes           | Truncated server-side                            |
-| Prompt injection attempts | User inputs sanitized before AI processing       |
-| Workout load failure      | Graceful recovery/error states                   |
-| Conflicting constraints   | Adaptive prioritization and graceful degradation |
-
----
-
-# Design Principles
-
-Pivot prioritizes:
-
-* adaptive realism over rigid programming
-* recovery-aware training
-* explainable personalization
-* deterministic safety constraints
-* lightweight AI augmentation
-* graceful degradation
-* mobile-first interaction design
-
----
-
-# Future Direction
-
-Planned evolution areas include:
-
-* progression tracking
-* movement-level performance memory
-* adaptive microcycles
-* fatigue accumulation modeling
-* long-term recovery adaptation
-* richer workout-composition intelligence
-* deeper personalization systems
-
----
-
-# License
+## License
 
 Private project. All rights reserved.
-
-Force rebuild
