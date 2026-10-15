@@ -286,8 +286,8 @@ export function WorkoutScreen({
                       )}
                     </div>
                     {ex.pivoted && ex.pivotRationale && (
-                      <p style={{ marginTop: 2, fontSize: 12, color: "rgba(255,255,255,0.55)", lineHeight: 1.4 }}>
-                        Pivoted: {ex.pivotRationale}
+                      <p style={{ marginTop: 3, marginBottom: 1, fontSize: 11, color: "rgba(255,255,255,0.50)", lineHeight: 1.5, fontStyle: "italic" }}>
+                        ↩ {ex.pivotRationale}
                       </p>
                     )}
                     <p style={{ marginTop: 2, fontSize: 13, color: "hsl(var(--muted-foreground))" }}>
