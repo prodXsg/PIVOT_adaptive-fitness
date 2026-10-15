@@ -2,10 +2,6 @@
 
 # Pivot
 
-<div align="center">
-  <img src="images/pivot-preview.png" alt="Pivot adaptive fitness app preview" width="400">
-</div>
-
 **Workouts that adapt to your actual day.**
 
 Most fitness apps optimize for plan consistency. Pivot optimizes for training consistency.
