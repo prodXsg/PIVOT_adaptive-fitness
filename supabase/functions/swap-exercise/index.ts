@@ -181,6 +181,11 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { exercise, constraint, workoutFocus, priorPivots, currentExercises, recentExercises, equipment, note } = body;
 
+    if (exercise?.pivoted === true) {
+      console.log("[swap-exercise] Blocked re-pivot of:", exercise.name);
+      return json({ error: "Exercise already pivoted. Cannot pivot twice." }, 400);
+    }
+
     console.log("[swap] request parsed", {
       exerciseName: exercise?.name,
       exerciseSetsReps: exercise?.setsReps,
