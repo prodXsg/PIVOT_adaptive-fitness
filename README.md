@@ -3,7 +3,7 @@
 # Pivot
 
 <p align="center">
-  <img src="./pivot-preview.png" alt="PIVOT fitness app mobile landing screen" width="250" />
+  <img src="./pivot-preview.png" alt="PIVOT fitness app mobile landing screen" width="300" />
 </p>
 
 Most fitness apps optimize for plan consistency. Pivot optimizes for training consistency.
