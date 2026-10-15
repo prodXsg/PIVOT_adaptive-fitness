@@ -100,7 +100,12 @@ export function PivotModal({
 
         {loading ? (
           <div className="py-10 flex flex-col items-center gap-4">
-            <div className="size-10 rounded-full border-[3px] border-secondary border-t-primary animate-spin" />
+            <div
+              className="size-10 rounded-full border-[3px] border-secondary border-t-primary"
+              style={{
+                animation: "spin 1s linear infinite",
+              }}
+            />
             <p className="text-sm text-muted-foreground animate-soft-pulse">Finding alternative...</p>
           </div>
         ) : (
@@ -139,5 +144,12 @@ export function PivotModal({
         )}
       </div>
     </div>
+
+    <style>{`
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+    `}</style>
   );
 }
