@@ -273,17 +273,17 @@ export function WorkoutScreen({
                         </span>
                       )}
                     </div>
+                    {ex.pivoted && ex.pivotRationale && (
+                      <p style={{ marginTop: 2, fontSize: 12, color: "rgba(255,255,255,0.55)", lineHeight: 1.4 }}>
+                        Pivoted: {ex.pivotRationale}
+                      </p>
+                    )}
                     <p style={{ marginTop: 2, fontSize: 13, color: "hsl(var(--muted-foreground))" }}>
                       {ex.setsReps}
                     </p>
                     {ex.cue && !isInactive && (
                       <p style={{ marginTop: 4, fontSize: 12, fontStyle: "italic", color: "hsl(var(--foreground)/0.45)", lineHeight: 1.4 }}>
                         {ex.cue}
-                      </p>
-                    )}
-                    {ex.pivoted && ex.pivotRationale && !isInactive && (
-                      <p style={{ marginTop: 4, fontSize: 11, color: "rgba(199,247,61,0.70)", lineHeight: 1.4 }}>
-                        ↩ {ex.pivotRationale}
                       </p>
                     )}
                   </div>
