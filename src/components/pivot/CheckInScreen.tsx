@@ -1,9 +1,14 @@
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, Info } from "lucide-react";
+import { ArrowLeft, ArrowRight, Info, X } from "lucide-react";
 import type { ReadinessSnapshot } from "./WorkoutIntentScreen";
 
 type NumericKey = "sleep" | "energy" | "soreness" | "time";
 type Selections = Partial<Record<NumericKey, number>>;
+
+type CustomTime = {
+  isCustom: boolean;
+  duration: number;
+};
 
 const TOTAL_QUESTIONS = 4;
 
@@ -101,6 +106,8 @@ export function CheckInScreen({
   );
   const [activeTooltip, setActiveTooltip] = useState<NumericKey | null>(null);
   const [chipAnim, setChipAnim] = useState<Record<string, boolean>>({});
+  const [customTimeOpen, setCustomTimeOpen] = useState(false);
+  const [customTime, setCustomTime] = useState<CustomTime>({ isCustom: false, duration: 30 });
 
   const answeredCount = Object.keys(selections).length;
   const allAnswered = answeredCount === TOTAL_QUESTIONS;
@@ -211,6 +218,7 @@ export function CheckInScreen({
                     onClick={(e) => {
                       e.stopPropagation();
                       selectNumeric(q.key, chip.value, chip.label);
+                      setCustomTime({ isCustom: false, duration: chip.value });
                     }}
                     style={chipStyle(selected, !!chipAnim[`${q.key}-${chip.label}`])}
                   >
@@ -219,6 +227,21 @@ export function CheckInScreen({
                 );
               })}
             </div>
+            {q.key === "time" && (
+              <button
+                type="button"
+                aria-pressed={customTime.isCustom}
+                aria-label="Custom duration"
+                className="pivot-checkin-chip"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCustomTimeOpen(true);
+                }}
+                style={chipStyle(customTime.isCustom, !!chipAnim["time-custom"])}
+              >
+                Custom ({customTime.isCustom ? `${customTime.duration} min` : "Set"})
+              </button>
+            )}
           </QuestionModule>
         ))}
       </div>
@@ -246,6 +269,20 @@ export function CheckInScreen({
         </button>
       </div>
 
+      {customTimeOpen && (
+        <CustomTimeModal
+          isOpen={customTimeOpen}
+          duration={customTime.duration}
+          onClose={() => setCustomTimeOpen(false)}
+          onSubmit={(duration) => {
+            setCustomTime({ isCustom: true, duration });
+            setSelections((s) => ({ ...s, time: duration }));
+            setCustomTimeOpen(false);
+            animateChip("time-custom");
+          }}
+        />
+      )}
+
       <style>{`
         .pivot-checkin-chip:active { transform: scale(0.96); transition: transform 120ms ease-out !important; }
         @keyframes cin-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
@@ -253,6 +290,89 @@ export function CheckInScreen({
         @keyframes cin-tooltip { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes chip-pop { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
       `}</style>
+    </div>
+  );
+}
+
+function CustomTimeModal({
+  isOpen,
+  duration,
+  onClose,
+  onSubmit,
+}: {
+  isOpen: boolean;
+  duration: number;
+  onClose: () => void;
+  onSubmit: (duration: number) => void;
+}) {
+  const [inputValue, setInputValue] = useState(duration);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-[430px] bg-card border-t border-border sm:border sm:rounded-3xl rounded-t-3xl p-6 pb-8 shadow-elevated">
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.18em] text-tertiary font-semibold">Time</p>
+            <h2 className="mt-1 text-xl font-bold tracking-tight">How many minutes?</h2>
+          </div>
+          <button onClick={onClose} className="size-9 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground">
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label htmlFor="time-input" className="text-sm font-medium">
+                Duration
+              </label>
+              <span className="text-lg font-bold text-primary">{inputValue} min</span>
+            </div>
+            <input
+              id="time-input"
+              type="range"
+              min="10"
+              max="90"
+              value={inputValue}
+              onChange={(e) => setInputValue(Number(e.target.value))}
+              className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
+              style={{
+                background: `linear-gradient(to right, #C7F73D 0%, #C7F73D ${((inputValue - 10) / 80) * 100}%, rgba(255,255,255,0.08) ${((inputValue - 10) / 80) * 100}%, rgba(255,255,255,0.08) 100%)`,
+              }}
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>10 min</span>
+              <span>90 min</span>
+            </div>
+          </div>
+
+          <div className="relative">
+            <input
+              type="number"
+              value={inputValue}
+              onChange={(e) => {
+                const val = Math.min(90, Math.max(10, Number(e.target.value) || 0));
+                setInputValue(val);
+              }}
+              min="10"
+              max="90"
+              className="w-full bg-elevated border border-border rounded-lg px-4 py-3 text-sm text-center font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40"
+              placeholder="Enter duration"
+            />
+          </div>
+
+          <button
+            onClick={() => onSubmit(inputValue)}
+            className="w-full bg-primary text-primary-foreground rounded-full py-3 font-semibold text-sm active:scale-[0.99] transition-transform"
+            style={{ color: "#000" }}
+          >
+            Set Duration
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
