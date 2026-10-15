@@ -10,8 +10,6 @@ Most fitness apps optimize for plan consistency. Pivot optimizes for training co
 
 Recovery fluctuates. Equipment is unpredictable. Energy changes. Time runs short. Pivot adapts workouts to real-world constraints so users can keep training when their original plan no longer fits.
 
----
-
 ## The Problem
 
 Traditional workout plans assume predictable schedules, recovery, and equipment availability.
@@ -21,8 +19,6 @@ But real life gets in the way. You slept five hours instead of eight, the gym is
 A rigid plan leaves users to figure out what to change and how to preserve the intent of their session.
 
 **Pivot treats changing conditions as inputs to the workout, not reasons to abandon it.**
-
----
 
 ## How It Works
 
@@ -45,8 +41,6 @@ When equipment is unavailable or a constraint changes mid-session, users can req
 
 Pivot aims to preserve the intended training stimulus while respecting the new constraint. Each pivot records the replacement and its rationale, creating a persistent history of how the workout evolved.
 
----
-
 ## What Makes Pivot Different
 
 - **Constraint-aware generation:** Composes workouts around current conditions rather than relying solely on fixed templates.
@@ -54,8 +48,6 @@ Pivot aims to preserve the intended training stimulus while respecting the new c
 - **Persistent pivot history:** Preserves actual substitutions and their reasoning.
 - **Recovery-aware re-entry:** Supports adapted workouts after four or more missed days.
 - **Graceful degradation:** Uses deterministic fallback logic when AI output cannot be used.
-
----
 
 ## Architecture
 
@@ -88,8 +80,6 @@ The system should reject the invalid result and route it through the appropriate
 
 This illustrates the intended architecture. Actual behavior depends on the implemented validation and fallback logic.
 
----
-
 ## Current Status
 
 Pivot is a working prototype deployed in production.
@@ -98,16 +88,12 @@ The project includes adaptive workout generation, focus and duration validation,
 
 Current development focuses on generation reliability and constraint handling. Implemented functionality is not the same as proven reliability or demonstrated improvements in training consistency.
 
----
-
 ## Roadmap
 
 - **Progression tracking:** Remember movement-level performance across sessions.
 - **Fatigue modeling:** Account for longer-term training load.
 - **Adaptive microcycles:** Use weekly training patterns to inform individual sessions.
 - **Richer personalization:** Combine readiness, performance history, equipment, and training goals.
-
----
 
 ## Tech Stack
 
@@ -120,8 +106,6 @@ Current development focuses on generation reliability and constraint handling. I
 - localStorage
 - Supabase Edge Functions (Deno)
 - Google Gemini 2.5 Flash
-
----
 
 ## License
 
